@@ -1,0 +1,23 @@
+{
+  "name": "College Timetable & Absence",
+  "short_name": "Timetable",
+  "description": "Local-first college timetable generation, absence cover and substitution management.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f4f6",
+  "theme_color": "#2563eb",
+  "categories": ["education", "productivity", "business"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Timetable Studio", "short_name": "Studio", "url": "./index.html#studio" },
+    { "name": "Analytics & Insights", "short_name": "Insights", "url": "./index.html#insights" },
+    { "name": "Daily Attendance", "short_name": "Attendance", "url": "./index.html#attendance" }
+  ]
+}

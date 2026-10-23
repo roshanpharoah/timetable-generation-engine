@@ -1,0 +1,25 @@
+# Demo / screen-recording videos are intentionally not tracked.
+# (The 223 MB reference recording and the generated showcase.)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.flv
+*.wmv
+*.m4v
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs / temp
+*.log
+*.tmp

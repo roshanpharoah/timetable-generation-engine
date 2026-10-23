@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#2563eb"/>
+<meta name="description" content="College timetable, absence and substitution management — local-first, installable, no server required."/>
+<title>College Timetable & Absence</title>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="icon" href="icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="stylesheet" href="styles.css"/>
+<link rel="stylesheet" href="awesome.css"/>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">📅</div>
+      <div class="brand-text">College Timetable</div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-section">
+        <span class="nav-section-title">Academic Operations</span>
+        <div class="nav-item active" data-panel="dashboard"><span class="emoji">🏠</span>Dashboard</div>
+        <div class="nav-item" data-panel="departments"><span class="emoji">🏢</span>Departments</div>
+        <div class="nav-item" data-panel="sections"><span class="emoji">🎓</span>Sections &amp; Curriculum</div>
+        <div class="nav-item" data-panel="rooms"><span class="emoji">🏫</span>Rooms &amp; Facilities</div>
+        <div class="nav-item" data-panel="staff"><span class="emoji">👥</span>Staff</div>
+        <div class="nav-item" data-panel="subjects"><span class="emoji">📚</span>Subjects</div>
+        <div class="nav-item" data-panel="attendance"><span class="emoji">📋</span>Daily Attendance</div>
+        <div class="nav-item" data-panel="calendar"><span class="emoji">🗓</span>Academic Calendar</div>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section-title">Timetabling</span>
+        <div class="nav-item" data-panel="generator"><span class="emoji">⚡</span>Timetable Generator</div>
+        <div class="nav-item" data-panel="studio"><span class="emoji">🛠️</span>Timetable Studio</div>
+        <div class="nav-item" data-panel="substitution"><span class="emoji">🔄</span>Faculty Substitution</div>
+        <div class="nav-item" data-panel="reports"><span class="emoji">📈</span>Reports &amp; Load</div>
+        <div class="nav-item" data-panel="insights"><span class="emoji">📊</span>Analytics &amp; Insights</div>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section-title">Governance</span>
+        <div class="nav-item" data-panel="regulations"><span class="emoji">📜</span>Regulations</div>
+        <div class="nav-item" data-panel="audit"><span class="emoji">📝</span>Audit Logs</div>
+        <div class="nav-item" data-panel="admin"><span class="emoji">🛡️</span>Administration</div>
+        <div class="nav-item" data-panel="settings"><span class="emoji">⚙</span>Settings</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="system-status">
+        <div class="status-dot"></div>
+        System Online
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn mobile-menu-btn" id="btnMenu" title="Open navigation" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <span class="term-chip" id="termChip" title="Current academic term">Term 1 · 2026-27</span>
+      </div>
+      <div class="topbar-right">
+        <button class="global-search" id="globalSearchBtn" onclick="TT.openCommandPalette()" title="Search everything (Ctrl+K)">
+          <span class="gs-icon">🔎</span>
+          <span class="gs-label">Search or jump to…</span>
+          <span class="gs-kbd">Ctrl K</span>
+        </button>
+        <div class="btn-notify" id="btnBell" title="Notifications">🔔<span class="notify-badge" id="bellCount"></span></div>
+        <div class="user-chip user-chip-btn" id="userChip" onclick="TT.openProfileMenu()" title="Account & role">
+          <div class="user-avatar" id="userAvatar">AD</div>
+          <div class="user-meta">
+            <div class="user-name" id="userName">System Administrator</div>
+            <div class="user-role" id="userRole">Academic Cell · Administrator</div>
+          </div>
+          <span class="user-caret">▾</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Dashboard -->
+      <section class="panel active" id="panel-dashboard">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Dashboard</div>
+            <div class="section-sub">Overview of your timetable and college operations</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn primary" onclick="TT.openGenerator()">Generate Timetable</button>
+          </div>
+        </div>
+        <div class="grid" id="dashStats"></div>
+        <div id="dashEnterprise"></div>
+        <div class="grid mt-24 dash-cols">
+          <div id="dashToday"></div>
+          <div id="dashRecent"></div>
+          <div id="dashHolidays"></div>
+        </div>
+        <div class="card mt-24">
+          <div class="section-title" style="font-size:1.1rem;margin-bottom:12px">Quick Actions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" onclick="TT.openGenerator()">⚡ Generate Timetable</button>
+            <button class="btn" onclick="TT.showPanel('staff')">👥 Manage Staff</button>
+            <button class="btn" onclick="TT.showPanel('departments')">🏢 Departments</button>
+            <button class="btn" onclick="TT.showPanel('substitution')">🔄 Substitutions</button>
+            <button class="btn" onclick="TT.showPanel('reports')">📈 Reports</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Timetable Generator -->
+      <section class="panel" id="panel-generator">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Timetable Gen Dashboard</div>
+            <div class="section-sub">Generate and manage your college timetable</div>
+          </div>
+          <div class="section-actions">
+            <span class="badge badge-info" id="genStatusBadge">Idle</span>
+            <button class="btn primary" onclick="TT.generateTimetable()">⚡ Generate Now</button>
+            <button class="btn" onclick="TT.importExcel()">📥 Import Excel</button>
+          </div>
+        </div>
+
+        <!-- Import card -->
+        <div class="card mt-24">
+          <div class="label">Import Data (Excel / CSV / JSON)</div>
+          <div style="border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;background:var(--surface-2);margin-bottom:16px">
+            <div style="font-weight:700;color:var(--text);margin-bottom:6px">Upload a multi-sheet workbook</div>
+            <div class="text-muted" style="font-size:0.85rem;margin-bottom:14px">Sheets auto-detected: Staff, Subjects, Sections, Rooms, Departments, Holidays</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:12px">
+              <button class="btn btn-sm" onclick="TT.downloadTemplate('excel')">Excel Template</button>
+              <button class="btn btn-sm" onclick="TT.downloadTemplate('csv')">CSV Templates</button>
+              <button class="btn btn-sm" onclick="TT.downloadTemplate('json')">JSON Template</button>
+              <button class="btn btn-sm success" onclick="TT.loadSampleData()">Load Sample Data</button>
+            </div>
+            <label class="btn btn-sm primary" style="display:inline-flex">Choose File
+              <input type="file" id="importFile" style="display:none" accept=".xlsx,.xls,.csv,.json,.txt" onchange="TT.handleImport(event)"/>
+            </label>
+            <div id="importResult" class="mt-8" style="font-size:0.85rem"></div>
+          </div>
+        </div>
+
+        <!-- Generation settings -->
+        <div class="card mt-24">
+          <div class="label">Generation Settings</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Days</label>
+              <input type="number" id="genDays" value="5" min="1" max="6"/>
+            </div>
+            <div class="form-group">
+              <label>Periods / Day</label>
+              <input type="number" id="genPeriods" value="8" min="1" max="10"/>
+            </div>
+            <div class="form-group">
+              <label>Max Hours / Week</label>
+              <input type="number" id="genMaxWeekly" value="18" min="1"/>
+            </div>
+            <div class="form-group">
+              <label>Max Hours / Day</label>
+              <input type="number" id="genMaxDaily" value="5" min="1"/>
+            </div>
+            <div class="form-group">
+              <label>Max Consecutive Periods</label>
+              <input type="number" id="genMaxConsec" value="3" min="1"/>
+            </div>
+            <div class="form-group" style="align-self:end;display:flex;align-items:center;gap:10px">
+              <input type="checkbox" id="genRespectHolidays" checked style="width:18px;height:18px"/>
+              <label style="margin-bottom:0;font-size:0.9rem">Respect holidays</label>
+            </div>
+          </div>
+          <div class="progress-overlay" id="genProgressOverlay">
+            <div class="progress-box">
+              <h3 id="genProgressTitle">Generating Timetable...</h3>
+              <div class="progress-bar-track"><div class="progress-bar-fill" id="genProgressBar"></div></div>
+              <div class="progress-text" id="genProgressText">0%</div>
+              <div id="genProgressLog" style="text-align:left;margin-top:12px;font-size:0.8rem;color:var(--text-muted);max-height:120px;overflow:auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="genResults" class="mt-24"></div>
+      </section>
+
+      <!-- Departments & Sections -->
+      <section class="panel" id="panel-departments">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Departments &amp; Sections Management</div>
+            <div class="section-sub">Manage departments, sections, and subjects</div>
+          </div>
+          <div class="section-actions" style="gap:8px">
+            <button class="btn primary" onclick="TT.deptTab('dept-subj')">Departments &amp; Subjects</button>
+            <button class="btn" onclick="TT.deptTab('faculty-tt')">Faculty Timetables</button>
+            <button class="btn" onclick="TT.deptTab('subject-wise')">Subject-Wise Timetable</button>
+            <button class="btn" onclick="TT.deptTab('bulk-view')">Bulk View (All Sections)</button>
+            <button class="btn ghost" onclick="TT.deptTab('customizations')">Customizations</button>
+          </div>
+        </div>
+        <div id="deptContent"></div>
+      </section>
+
+      <!-- Sections & Curriculum -->
+      <section class="panel" id="panel-sections">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Sections &amp; Curriculum</div>
+            <div class="section-sub">Class groups, semester mapping and subject prescription per section</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.showPanel('departments')">Departments</button>
+            <button class="btn" onclick="TT.exportSectionsCSV()">⬇ Export</button>
+            <button class="btn primary" onclick="TT.openSectionModal()">+ Add Section</button>
+          </div>
+        </div>
+        <div class="card toolbar-card">
+          <div class="toolbar">
+            <input type="text" id="sectionSearch" placeholder="Search section, department…" oninput="TT.renderSections()"/>
+            <select id="sectionDeptFilter" onchange="TT.renderSections()"><option value="">All Departments</option></select>
+            <select id="sectionSemFilter" onchange="TT.renderSections()"><option value="">All Semesters</option></select>
+            <span class="badge badge-neutral" id="sectionCount">0 shown</span>
+          </div>
+        </div>
+        <div id="sectionsContent" class="mt-16"></div>
+      </section>
+
+      <!-- Rooms & Facilities -->
+      <section class="panel" id="panel-rooms">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Rooms &amp; Facilities</div>
+            <div class="section-sub">Teaching spaces, capacity, equipment and weekly utilisation</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.exportRoomsCSV()">⬇ Export</button>
+            <button class="btn primary" onclick="TT.openRoomModal()">+ Add Room</button>
+          </div>
+        </div>
+        <div class="card toolbar-card">
+          <div class="toolbar">
+            <input type="text" id="roomSearch" placeholder="Search room, building…" oninput="TT.renderRooms()"/>
+            <select id="roomTypeFilter" onchange="TT.renderRooms()"><option value="">All Types</option><option>Classroom</option><option>Lab</option><option>Seminar Hall</option></select>
+            <select id="roomDeptFilter" onchange="TT.renderRooms()"><option value="">All Departments</option></select>
+            <span class="badge badge-neutral" id="roomCount">0 shown</span>
+          </div>
+        </div>
+        <div id="roomsContent" class="mt-16"></div>
+      </section>
+
+      <!-- Staff Directory -->
+      <section class="panel" id="panel-staff">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Staff Directory</div>
+            <div class="section-sub">Faculty master data, workload, availability and attendance in one place</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn primary" onclick="TT.openStaffModal()">+ Add Staff</button>
+            <button class="btn" onclick="TT.exportStaffCSV()">⬇ Export</button>
+            <button class="btn" onclick="TT.showPanel('generator')">📥 Import</button>
+            <button class="btn danger" onclick="TT.clearAllStaff()">Clear All</button>
+          </div>
+        </div>
+        <div class="card toolbar-card">
+          <div class="toolbar">
+            <input type="text" id="staffSearch" placeholder="Search name, ID, subject…" oninput="TT._staffPage=0;TT.renderStaff()"/>
+            <select id="staffDeptFilter" onchange="TT._staffPage=0;TT.renderStaff()"><option value="">All Departments</option></select>
+            <select id="staffStatusFilter" onchange="TT._staffPage=0;TT.renderStaff()">
+              <option value="">All Statuses</option><option value="Present">Present</option><option value="Absent">Absent</option>
+            </select>
+            <select id="staffSort" onchange="TT._staffPage=0;TT.renderStaff()">
+              <option value="name">Sort: Name</option>
+              <option value="dept">Sort: Department</option>
+              <option value="load">Sort: Highest Load</option>
+              <option value="status">Sort: Status</option>
+            </select>
+            <span class="badge badge-neutral" id="staffCount">0 shown</span>
+          </div>
+          <div id="staffBulkBar" class="bulk-bar"></div>
+        </div>
+        <div class="table-wrap mt-16">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:38px"><input type="checkbox" id="staffSelectAll" title="Select all visible" onchange="TT.toggleAllStaff(this.checked)"/></th>
+                <th style="width:110px">Staff ID</th>
+                <th>Staff Name</th>
+                <th style="width:120px">Department</th>
+                <th>Expertise</th>
+                <th style="width:210px">Workload</th>
+                <th style="width:120px">Status</th>
+                <th style="width:210px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody"></tbody>
+          </table>
+        </div>
+        <div id="staffPager" class="pager"></div>
+      </section>
+
+      <!-- Subjects -->
+      <section class="panel" id="panel-subjects">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Subject Catalogue</div>
+            <div class="section-sub">Curriculum units, L-T-P-C structure, expert coverage and delivery status</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.showPanel('staff')">Staff Directory</button>
+            <button class="btn" onclick="TT.showPanel('sections')">Curriculum Mapping</button>
+            <button class="btn" onclick="TT.exportSubjectsCSV()">⬇ Export</button>
+            <button class="btn primary" onclick="TT.openSubjectModal()">+ Add Subject</button>
+          </div>
+        </div>
+        <div class="card toolbar-card">
+          <div class="toolbar">
+            <input type="text" id="subjectSearch" placeholder="Search code, name, department…" oninput="TT._subjectPage=0;TT.renderSubjects()"/>
+            <select id="subjectDeptFilter" onchange="TT._subjectPage=0;TT.renderSubjects()"><option value="">All Departments</option></select>
+            <select id="subjectTypeFilter" onchange="TT._subjectPage=0;TT.renderSubjects()">
+              <option value="">All Types</option><option value="Theory">Theory</option><option value="Lab">Lab</option>
+            </select>
+            <select id="subjectSemFilter" onchange="TT._subjectPage=0;TT.renderSubjects()"><option value="">All Semesters</option></select>
+            <span class="badge badge-neutral" id="subjectCount">0 shown</span>
+          </div>
+        </div>
+        <div class="table-wrap mt-16">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:130px">Code</th>
+                <th>Name</th>
+                <th style="width:120px">Department</th>
+                <th style="width:100px">Type</th>
+                <th style="width:110px">L-T-P-C</th>
+                <th style="width:120px">Experts</th>
+                <th style="width:150px">Delivery</th>
+                <th style="width:190px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subjectTableBody"></tbody>
+          </table>
+        </div>
+        <div id="subjectPager" class="pager"></div>
+      </section>
+
+      <!-- Daily Attendance -->
+      <section class="panel" id="panel-attendance">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Daily Attendance</div>
+            <div class="section-sub">Slide a switch to mark Present / Absent — substitutions apply automatically</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.markAllAttendance('present')">Mark All Present</button>
+            <button class="btn danger" onclick="TT.markAllAttendance('absent')">Mark All Absent</button>
+            <button class="btn primary" onclick="TT.autoProcessAbsences()">Auto-process Absences</button>
+          </div>
+        </div>
+        <div class="filters mt-16">
+          <div class="date-nav">
+            <button class="btn btn-sm" onclick="TT.shiftAttDate(-1)" title="Previous working day">‹</button>
+            <input type="date" id="attDate"/>
+            <button class="btn btn-sm" onclick="TT.shiftAttDate(1)" title="Next day">›</button>
+            <button class="btn btn-sm" onclick="TT.jumpAttToday()">Today</button>
+          </div>
+          <select id="attDeptFilter" onchange="TT.renderAttendance()"><option value="">All Departments</option></select>
+          <select id="attStatusFilter" onchange="TT.renderAttendance()">
+            <option value="">All Staff</option><option value="Present">Present only</option><option value="Absent">Absent only</option>
+          </select>
+          <input type="text" id="attSearch" placeholder="Search staff…" oninput="TT.renderAttendance()"/>
+          <button class="btn" onclick="TT.exportAttendanceCSV()">⬇ Export</button>
+          <label class="switch-scope"><input type="checkbox" id="attWeekScope"/> Apply to whole week</label>
+        </div>
+        <div class="card mt-16" id="attendanceSummary"></div>
+        <div class="card mt-16" id="attendanceLog"></div>
+        <div class="table-wrap mt-16">
+          <table>
+            <thead>
+              <tr>
+                <th>Staff ID</th>
+                <th>Staff Name</th>
+                <th style="width:150px">Department</th>
+                <th style="width:150px">Attendance</th>
+                <th style="width:120px">Slots Today</th>
+                <th style="width:200px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Academic Calendar -->
+      <section class="panel" id="panel-calendar">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Academic Calendar</div>
+            <div class="section-sub">Manage holidays, compensatory days, and semester schedule</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn primary" onclick="TT.showPanel('calendar');TT.focusHolidayForm()">+ Holiday</button>
+            <button class="btn" onclick="TT.exportCalendarCSV()">⬇ Export Calendar</button>
+          </div>
+        </div>
+        <div class="card mt-16">
+          <div class="cal-head">
+            <div class="cal-nav">
+              <button class="btn btn-sm" onclick="TT.shiftCalMonth(-1)">‹</button>
+              <b id="calMonthLabel">—</b>
+              <button class="btn btn-sm" onclick="TT.shiftCalMonth(1)">›</button>
+              <button class="btn btn-sm" onclick="TT.jumpCalMonth()">This month</button>
+            </div>
+            <div class="cal-legend">
+              <span><i class="cal-dot holiday"></i>Holiday</span>
+              <span><i class="cal-dot comp"></i>Compensatory</span>
+              <span><i class="cal-dot today"></i>Today</span>
+              <span><i class="cal-dot working"></i>Working day</span>
+            </div>
+          </div>
+          <div id="calMonthGrid"></div>
+        </div>
+        <div class="grid mt-24" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+          <div class="card">
+            <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">🎌 Special Holidays</div>
+            <div class="form-row">
+              <div class="form-group"><label>Date</label><input type="date" id="holDate"/></div>
+              <div class="form-group"><label>Holiday Name</label><input id="holName" placeholder="e.g. Republic Day"/></div>
+            </div>
+            <button class="btn primary" onclick="TT.addHoliday()" style="width:100%">+ Add</button>
+            <div id="holidayList" class="mt-16" style="font-size:0.88rem;color:var(--text-muted)">No holidays added yet.</div>
+          </div>
+
+          <div class="card">
+            <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">📅 Semester / Schedule Duration</div>
+            <div class="form-row">
+              <div class="form-group"><label>Start Date</label><input type="date" id="semStart" value="2026-07-01"/></div>
+              <div class="form-group"><label>End Date</label><input type="date" id="semEnd" value="2026-12-30"/></div>
+            </div>
+            <button class="btn primary" onclick="TT.saveSemester()" style="width:100%">Save</button>
+            <div class="grid mt-16" style="grid-template-columns:1fr 1fr 1fr;gap:12px">
+              <div class="card" style="padding:16px;border:none;box-shadow:none;background:transparent">
+                <div class="text-muted" style="font-size:0.75rem">Working Days</div><div class="num" id="calWorkDays">131</div>
+              </div>
+              <div class="card" style="padding:16px;border:none;box-shadow:none;background:transparent">
+                <div class="text-muted" style="font-size:0.75rem">Holidays</div><div class="num" id="calHolidays">0</div>
+              </div>
+              <div class="card" style="padding:16px;border:none;box-shadow:none;background:transparent">
+                <div class="text-muted" style="font-size:0.75rem">Compensatory</div><div class="num" id="calComp">0</div>
+              </div>
+            </div>
+            <div class="mt-16">
+              <div class="text-muted" style="font-size:0.75rem">Configure Number of Working Days for Schedule (Target / Override)</div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="calOverride" placeholder="Auto" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px"/>
+                <button class="btn btn-sm" onclick="TT.setWorkingDays()">Set Working Days</button>
+                <button class="btn btn-sm" onclick="TT.resetToAuto()">Reset to Auto</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column:1/-1">
+            <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">🔄 Compensatory / Rescheduled Days</div>
+            <div class="text-muted" style="font-size:0.88rem;margin-bottom:10px">When a holiday causes loss of classes, assign a compensatory day. The chosen date will follow the timetable of the designated day (e.g., a Saturday acting as Monday).</div>
+            <div class="form-row">
+              <div class="form-group"><label>Compensatory Date</label><input type="date" id="compDate"/></div>
+              <div class="form-group"><label>Follows Timetable Of</label><select id="compFollows" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+              <div class="form-group"><label>Reason</label><input id="compReason" placeholder="e.g. Republic Day"/></div>
+            </div>
+            <button class="btn primary" onclick="TT.addCompDay()" style="width:100%">+ Add</button>
+            <div id="compList" class="mt-16" style="font-size:0.88rem;color:var(--text-muted)">No compensatory days assigned.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports & Load -->
+      <section class="panel" id="panel-reports">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Reports &amp; Load</div>
+            <div class="section-sub">Faculty workload, conflicts, and export options</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.showPanel('staff')">Staff Directory</button>
+            <button class="btn" onclick="TT.showPanel('substitution')">Substitutions</button>
+            <button class="btn" onclick="TT.exportReportCSV()">Report CSV</button>
+            <button class="btn" onclick="TT.exportCSV()">Timetable CSV</button>
+            <button class="btn" onclick="TT.exportExcel()">Excel</button>
+            <button class="btn" onclick="TT.exportJSON()">JSON</button>
+            <button class="btn" onclick="TT.exportICal()">iCal</button>
+            <button class="btn" onclick="TT.showPanel('studio')">🛠 Studio</button>
+            <button class="btn" onclick="TT.exportSharePack()">📦 Share Pack</button>
+            <button class="btn info" onclick="TT.printReport()">Print Report</button>
+          </div>
+        </div>
+        <div class="card toolbar-card" id="reportsToolbar">
+          <div class="toolbar">
+            <select id="reportDeptFilter" onchange="TT.renderReports()"><option value="">All Departments</option></select>
+            <select id="reportScope" onchange="TT.renderReports()">
+              <option value="all">All teaching slots</option>
+              <option value="today">Today only</option>
+            </select>
+            <label class="switch-scope"><input type="checkbox" id="reportOnlyIssues" onchange="TT.renderReports()"/> Issues only</label>
+            <span class="badge badge-neutral" id="reportCount">—</span>
+          </div>
+        </div>
+        <div id="reportsContent" class="mt-24"></div>
+      </section>
+
+      <!-- Timetable Studio -->
+      <section class="panel" id="panel-studio">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Timetable Studio</div>
+            <div class="section-sub">Click a slot to edit it · drag to move or swap · pin sessions before regenerating</div>
+          </div>
+          <div class="section-actions">
+            <span class="badge badge-info" id="studioPublishBadge">Draft</span>
+            <button class="btn" onclick="TT.exportSharePack()" title="Download a standalone timetable pack">📦 Share Pack</button>
+            <button class="btn" onclick="TT.printStudio()" title="Print the current studio view">🖨 Print</button>
+            <button class="btn" onclick="TT.regenerateUnlocked()" title="Keep pinned sessions, regenerate everything else">♻ Regenerate Unlocked</button>
+            <button class="btn primary" onclick="TT.publishSchedule()" title="Publish this timetable">🚀 Publish</button>
+          </div>
+        </div>
+        <div id="studioContent" class="mt-16"></div>
+      </section>
+
+      <!-- Analytics & Insights -->
+      <section class="panel" id="panel-insights">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Analytics &amp; Insights</div>
+            <div class="section-sub">Utilisation heatmaps, workload fairness, attendance trends and room occupancy</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.exportInsightsCSV()">⬇ Export CSV</button>
+            <button class="btn" onclick="TT.printInsights()">🖨 Print</button>
+          </div>
+        </div>
+        <div id="insightsContent" class="mt-16"></div>
+      </section>
+
+      <!-- Faculty Substitution -->
+      <section class="panel" id="panel-substitution">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Faculty Substitution Management</div>
+            <div class="section-sub">Select absent faculty and manage substitution history</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.showPanel('attendance')">Daily Attendance</button>
+            <button class="btn" onclick="TT.showPanel('staff')">Staff Directory</button>
+            <button class="btn" onclick="TT.showPanel('reports')">Load Report</button>
+          </div>
+        </div>
+        <div class="grid mt-16" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))" id="subStats"></div>
+        <div style="display:flex;gap:24px;margin-bottom:24px;margin-top:24px">
+          <div class="card" style="flex:1">
+            <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">👤 Select Absent Faculty</div>
+            <div style="display:flex;gap:12px;align-items:end;margin-bottom:16px">
+              <input type="date" id="subDate" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;flex:1"/>
+              <select id="subDeptFilter" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px"><option value="">All Departments</option></select>
+            </div>
+            <input type="text" id="subSearch" placeholder="Search faculty..." oninput="TT.renderSubstitutionFaculty()" style="width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:0.92rem"/>
+            <div id="substitutionFacultyList"></div>
+          </div>
+
+          <div class="card" style="flex:1;width:380px">
+            <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">⏰ Substitution History</div>
+            <div id="substitutionHistory" style="font-size:0.88rem;color:var(--text-muted)"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-weight:700;color:var(--text);font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">🌴 Planned Leaves</div>
+          <div id="leavePlannerHost"></div>
+        </div>
+      </section>
+
+      <!-- Administration -->
+      <section class="panel" id="panel-admin">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Administration</div>
+            <div class="section-sub">Institution profile, users &amp; roles, period timings, preferences and data health</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.runHealthCheck()">🩺 Run Health Check</button>
+            <button class="btn primary" onclick="TT.saveOrgProfile()">Save Profile</button>
+          </div>
+        </div>
+        <div id="adminContent" class="mt-16"></div>
+      </section>
+
+      <!-- Settings -->
+      <section class="panel" id="panel-settings">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Timetable Settings</div>
+            <div class="section-sub">Configure workload rules and generation constraints</div>
+          </div>
+        </div>
+        <div class="card mt-24">
+          <div class="label">Institution</div>
+          <div class="form-row">
+            <div class="form-group"><label>Institution Name</label><input type="text" id="instName"/></div>
+            <div class="form-group"><label>Academic Year</label><input type="text" id="instYear"/></div>
+          </div>
+        </div>
+        <div class="card mt-24">
+          <div class="label">Workload Rules</div>
+          <div class="form-row">
+            <div class="form-group"><label>Max Weekly Hours</label><input type="number" id="ruleMaxWeekly" value="18"/></div>
+            <div class="form-group"><label>Max Daily Hours</label><input type="number" id="ruleMaxDaily" value="5"/></div>
+            <div class="form-group"><label>Max Consecutive</label><input type="number" id="ruleMaxConsec" value="3"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Casual Leave / Year</label><input type="number" id="ruleCasual" value="12"/></div>
+            <div class="form-group"><label>Sick Leave / Year</label><input type="number" id="ruleSick" value="10"/></div>
+            <div class="form-group" style="align-self:end"><button class="btn primary" onclick="TT.saveRules()">Save Rules</button></div>
+          </div>
+        </div>
+        <div class="card mt-24">
+          <div class="label">Backup &amp; Restore</div>
+          <p class="text-muted">Download a full snapshot of everything stored in this browser, or restore from a previous backup file.</p>
+          <div id="backupStats" class="text-muted" style="font-size:0.82rem;margin-bottom:12px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" onclick="TT.downloadBackup()">⬇ Download Backup</button>
+            <label class="btn" style="display:inline-flex">⬆ Restore Backup
+              <input type="file" accept=".json" style="display:none" onchange="TT.handleRestore(event)"/>
+            </label>
+            <button class="btn info" onclick="TT.snapshotVersion('manual snapshot')">📸 Snapshot Current Timetable</button>
+          </div>
+        </div>
+        <div class="card mt-24">
+          <div class="label">Timetable Version History</div>
+          <div id="versionHistoryHost" class="mt-8"></div>
+        </div>
+        <div class="card mt-24">
+          <div class="label">Data Reset</div>
+          <p class="text-muted">Danger zone: this wipes all local data and reseeds defaults.</p>
+          <button class="btn danger" onclick="TT.resetData()">Reset All Data</button>
+        </div>
+      </section>
+
+      <!-- University Regulations -->
+      <section class="panel" id="panel-regulations">
+        <div class="section-head">
+          <div>
+            <div class="section-title">University Regulations &amp; Compliance</div>
+            <div class="section-sub">L-T-P-C structure, workload rules and conflict audit against university norms</div>
+          </div>
+        </div>
+        <div id="regulationsContent" class="mt-24"></div>
+      </section>
+
+      <!-- Audit Logs -->
+      <section class="panel" id="panel-audit">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Audit Logs</div>
+            <div class="section-sub">Every action recorded with actor, timestamp and details</div>
+          </div>
+          <div class="section-actions">
+            <button class="btn" onclick="TT.exportAuditCSV()">Export CSV</button>
+          </div>
+        </div>
+        <div id="auditContent" class="mt-24"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- Command palette -->
+<div class="cmd-overlay" id="cmdPalette">
+  <div class="cmd-box" role="dialog" aria-label="Command palette">
+    <div class="cmd-input-row">
+      <span class="cmd-icon">⌘</span>
+      <input id="cmdInput" placeholder="Search staff, subjects, sections, rooms, actions…" autocomplete="off"/>
+      <span class="cmd-esc">ESC</span>
+    </div>
+    <div class="cmd-results" id="cmdResults"></div>
+    <div class="cmd-foot">
+      <span>↑↓ navigate</span><span>↵ open</span><span>Ctrl K toggle</span><span>? shortcuts</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Generic modal -->
+<div class="modal" id="modalGeneric">
+  <div class="modal-content">
+    <span class="modal-close" onclick="TT.closeModal('modalGeneric')">&times;</span>
+    <h3 id="modalTitle" style="margin-bottom:16px">Modal</h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Assistant: floating launcher + window (not a page/tab) -->
+<button class="chat-fab" id="assistantFab" title="Assistant" onclick="TT.toggleAssistant()">
+  <span class="fab-icon">💬</span>
+  <span class="fab-dot" id="assistantDot"></span>
+</button>
+
+<div class="chat-window" id="assistantChat">
+  <div class="chat-header">
+    <div class="chat-title">
+      <span class="chat-avatar">✦</span>
+      <div>
+        <div class="chat-name">Assistant</div>
+        <div class="chat-status">Timetable help</div>
+      </div>
+    </div>
+    <div class="chat-header-actions">
+      <button class="chat-icon-btn" title="Reference documents" onclick="TT.toggleAssistDocs()">📎</button>
+      <button class="chat-icon-btn" title="Clear conversation" onclick="TT.clearAssistant()">⟳</button>
+      <button class="chat-icon-btn" title="Close" onclick="TT.toggleAssistant(false)">✕</button>
+    </div>
+  </div>
+
+  <div class="assist-suggest" id="assistSuggest"></div>
+
+  <div class="chat-messages" id="assistantMessages"></div>
+
+  <div class="chat-docs hidden" id="assistantDocs">
+    <div class="chat-docs-head">
+      <span>Reference documents</span>
+      <label class="chat-icon-btn" title="Add document">＋
+        <input type="file" accept=".pdf,.txt,.md,.json,.csv,.xlsx,.xls" style="display:none" onchange="TT.ragIngestFile(event)"/>
+      </label>
+    </div>
+    <div id="ragDocList" style="font-size:0.84rem"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="ragQuery" placeholder="Search documents..." onkeydown="if(event.key==='Enter')TT.ragSearch()" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.84rem"/>
+      <button class="btn btn-sm" onclick="TT.ragSearch()">Search</button>
+    </div>
+    <pre id="ragResults" style="white-space:pre-wrap;font-size:0.8rem;color:var(--text-muted);margin-top:10px;max-height:150px;overflow:auto"></pre>
+  </div>
+
+  <div class="chat-input">
+    <input id="assistantInput" placeholder="Ask or command..." onkeydown="if(event.key==='Enter')TT.assistantAsk()"/>
+    <button onclick="TT.assistantAsk()">Send</button>
+  </div>
+</div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+<script src="enterprise.js"></script>
+<script src="awesome.js"></script>
+</body>
+</html>
